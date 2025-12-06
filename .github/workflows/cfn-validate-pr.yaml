@@ -28,8 +28,17 @@ jobs:
 
       - name: Deploy our stack
         run: |
-          stack_name="pr-test-stack-${{github.event.pull_request.number}}"
-          aws cloudformation create-stack --stack-name $stack_name --template-body file://cloudformation/s3-bucket.yaml --parameters ParameterKey=Environment,ParameterValue=test
+          set -e
+          stack_name="pr-test-stack-${{ github.event.pull_request.number }}"
+
+          echo "Deploying stack: $stack_name"
+
+          aws cloudformation deploy \
+            --stack-name "$stack_name" \
+            --template-file cloudformation/s3-bucket.yaml \
+            --parameter-overrides Environment=test \
+            --no-fail-on-empty-changeset
+
 
       - name: Comment on the PR
         uses: actions/github-script@v6
